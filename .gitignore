@@ -1,0 +1,30 @@
+﻿# ESP-IDF build artifacts
+build/
+**/build/
+sdkconfig.old
+sdkconfig.ci
+*.bin
+*.elf
+*.map
+
+# Editor and IDE
+.cache/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/c_cpp_properties.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+.clangd/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs & temp files
+*.log
+__pycache__/
+*.pyc
