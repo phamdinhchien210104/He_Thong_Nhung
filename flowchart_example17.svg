@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 760" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#fb923c"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="760" fill="url(#bg)" rx="16"/>
+  <rect x="2" y="2" width="956" height="756" fill="none" stroke="#334155" stroke-width="2" rx="15"/>
+
+  <!-- Title -->
+  <text x="480" y="42" font-family="system-ui, sans-serif" font-size="22" font-weight="bold" fill="#38bdf8" text-anchor="middle">LƯU ĐỒ THUẬT TOÁN VÍ DỤ 17: COUNTING SEMAPHORE</text>
+  <text x="480" y="68" font-family="system-ui, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">Mô phỏng 3 sự kiện ngắt dồn dập &amp; bảo lưu giá trị đếm Count = 0 → 1 → 2 → 3</text>
+
+  <!-- Column 1: vPeriodicTask -->
+  <rect x="30" y="90" width="280" height="640" fill="#064e3b" fill-opacity="0.3" stroke="#22c55e" stroke-width="2" rx="10" stroke-dasharray="4 2"/>
+  <rect x="40" y="100" width="260" height="32" fill="#15803d" rx="6"/>
+  <text x="170" y="122" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">vPeriodicTask (Ưu tiên 1)</text>
+
+  <rect x="60" y="150" width="220" height="45" fill="#1e293b" stroke="#22c55e" stroke-width="1.5" rx="22" filter="url(#shadow)"/>
+  <text x="170" y="177" font-family="system-ui, sans-serif" font-size="12" fill="#e2e8f0" text-anchor="middle">Bắt đầu chu kỳ vòng lặp</text>
+
+  <line x1="170" y1="195" x2="170" y2="225" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="50" y="225" width="240" height="55" fill="#1e293b" stroke="#22c55e" stroke-width="1.5" rx="8" filter="url(#shadow)"/>
+  <text x="170" y="247" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#fde047" text-anchor="middle">vTaskDelay(500ms)</text>
+  <text x="170" y="267" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">Task chuyển sang trạng thái BLOCKED</text>
+
+  <line x1="170" y1="280" x2="170" y2="310" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="50" y="310" width="240" height="45" fill="#1e293b" stroke="#22c55e" stroke-width="1.5" rx="8" filter="url(#shadow)"/>
+  <text x="170" y="328" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">Hết 500ms: Running trở lại</text>
+  <text x="170" y="344" font-family="system-ui, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">In: About to generate interrupt</text>
+
+  <line x1="170" y1="355" x2="170" y2="385" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="45" y="385" width="250" height="55" fill="#1e293b" stroke="#f97316" stroke-width="2" rx="8" filter="url(#shadow)"/>
+  <text x="170" y="407" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#fb923c" text-anchor="middle">esp_timer_start_once(timer, 0)</text>
+  <text x="170" y="427" font-family="system-ui, sans-serif" font-size="11" fill="#fca5a5" text-anchor="middle">★ KÍCH HOẠT NGẮT PHẦN CỨNG</text>
+
+  <!-- Line trigger interrupt from Periodic to ISR -->
+  <path d="M 295 412 L 340 412 L 340 172 L 375 172" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-dasharray="5 3" marker-end="url(#arrow-orange)"/>
+
+  <rect x="50" y="580" width="240" height="45" fill="#1e293b" stroke="#22c55e" stroke-width="1.5" rx="8" filter="url(#shadow)"/>
+  <text x="170" y="598" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">Được trả lại quyền CPU</text>
+  <text x="170" y="614" font-family="system-ui, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">In: Periodic task - Interrupt generated</text>
+
+  <!-- Loop back line -->
+  <path d="M 170 625 L 170 700 L 40 700 L 40 172 L 60 172" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Column 2: ISR -->
+  <rect x="340" y="90" width="280" height="640" fill="#7c2d12" fill-opacity="0.3" stroke="#f97316" stroke-width="2" rx="10" stroke-dasharray="4 2"/>
+  <rect x="350" y="100" width="260" height="32" fill="#c2410c" rx="6"/>
+  <text x="480" y="122" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">vExampleInterruptHandler (ISR)</text>
+
+  <rect x="375" y="150" width="210" height="45" fill="#1e293b" stroke="#f97316" stroke-width="1.5" rx="22" filter="url(#shadow)"/>
+  <text x="480" y="177" font-family="system-ui, sans-serif" font-size="12" fill="#e2e8f0" text-anchor="middle">Ngắt kích hoạt (Ngữ cảnh ISR)</text>
+
+  <line x1="480" y1="195" x2="480" y2="225" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="355" y="225" width="250" height="50" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" rx="8" filter="url(#shadow)"/>
+  <text x="480" y="244" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#38bdf8" text-anchor="middle">xSemaphoreGiveFromISR() [Lần 1]</text>
+  <text x="480" y="262" font-family="system-ui, sans-serif" font-size="10.5" fill="#4ade80" text-anchor="middle">★ Count: 0 → 1 | woken = pdTRUE</text>
+
+  <line x1="480" y1="275" x2="480" y2="300" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="355" y="300" width="250" height="50" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" rx="8" filter="url(#shadow)"/>
+  <text x="480" y="319" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#38bdf8" text-anchor="middle">xSemaphoreGiveFromISR() [Lần 2]</text>
+  <text x="480" y="337" font-family="system-ui, sans-serif" font-size="10.5" fill="#4ade80" text-anchor="middle">★ Count: 1 → 2 (Lưu sự kiện thứ 2)</text>
+
+  <line x1="480" y1="350" x2="480" y2="375" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="355" y="375" width="250" height="50" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" rx="8" filter="url(#shadow)"/>
+  <text x="480" y="394" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#38bdf8" text-anchor="middle">xSemaphoreGiveFromISR() [Lần 3]</text>
+  <text x="480" y="412" font-family="system-ui, sans-serif" font-size="10.5" fill="#4ade80" text-anchor="middle">★ Count: 2 → 3 (Lưu sự kiện thứ 3)</text>
+
+  <line x1="480" y1="425" x2="480" y2="455" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Decision Diamond -->
+  <polygon points="480,455 580,490 480,525 380,490" fill="#1e293b" stroke="#eab308" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="480" y="488" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#fde047" text-anchor="middle">woken ==</text>
+  <text x="480" y="502" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#fde047" text-anchor="middle">pdTRUE?</text>
+
+  <line x1="480" y1="525" x2="480" y2="560" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="495" y="545" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#4ade80">Đúng</text>
+
+  <rect x="355" y="560" width="250" height="55" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" rx="8" filter="url(#shadow)"/>
+  <text x="480" y="580" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#e2e8f0" text-anchor="middle">portYIELD_FROM_ISR(pdTRUE)</text>
+  <text x="480" y="598" font-family="system-ui, sans-serif" font-size="10.5" fill="#38bdf8" text-anchor="middle">esp_timer_isr_dispatch_need_yield()</text>
+
+  <line x1="480" y1="615" x2="480" y2="650" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="365" y="650" width="230" height="45" fill="#1e293b" stroke="#f97316" stroke-width="1.5" rx="22" filter="url(#shadow)"/>
+  <text x="480" y="670" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#fb923c" text-anchor="middle">Thoát ISR</text>
+  <text x="480" y="685" font-family="system-ui, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">Chuyển Context sang Task Pri 3</text>
+
+  <!-- Line to HandlerTask -->
+  <path d="M 595 672 L 635 672 L 635 172 L 685 172" fill="none" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Column 3: vHandlerTask -->
+  <rect x="650" y="90" width="280" height="640" fill="#1e3a8a" fill-opacity="0.3" stroke="#3b82f6" stroke-width="2" rx="10" stroke-dasharray="4 2"/>
+  <rect x="660" y="100" width="260" height="32" fill="#1d4ed8" rx="6"/>
+  <text x="790" y="122" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">vHandlerTask (Ưu tiên 3)</text>
+
+  <rect x="685" y="150" width="210" height="45" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5" rx="22" filter="url(#shadow)"/>
+  <text x="790" y="177" font-family="system-ui, sans-serif" font-size="12" fill="#e2e8f0" text-anchor="middle">Được đánh thức (Pri 3 &gt; Pri 1)</text>
+
+  <line x1="790" y1="195" x2="790" y2="235" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="665" y="235" width="250" height="50" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" rx="8" filter="url(#shadow)"/>
+  <text x="790" y="255" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#38bdf8" text-anchor="middle">xSemaphoreTake(portMAX_DELAY)</text>
+  <text x="790" y="272" font-family="system-ui, sans-serif" font-size="10.5" fill="#94a3b8" text-anchor="middle">Kiểm tra số đếm semaphore</text>
+
+  <line x1="790" y1="285" x2="790" y2="320" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Decision Diamond Handler -->
+  <polygon points="790,320 890,355 790,390 690,355" fill="#1e293b" stroke="#eab308" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="790" y="352" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#fde047" text-anchor="middle">Count &gt; 0?</text>
+
+  <!-- True branch: loop -->
+  <line x1="790" y1="390" x2="790" y2="430" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="805" y="415" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#4ade80">Có (Lần 1, 2, 3)</text>
+
+  <rect x="665" y="430" width="250" height="60" fill="#1e293b" stroke="#22c55e" stroke-width="1.5" rx="8" filter="url(#shadow)"/>
+  <text x="790" y="450" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#4ade80" text-anchor="middle">★ THÔNG SỐ: Count = Count - 1</text>
+  <text x="790" y="470" font-family="system-ui, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">In Log: Handler task - Processing event</text>
+
+  <!-- Loop back to Take -->
+  <path d="M 915 460 L 935 460 L 935 260 L 915 260" fill="none" stroke="#38bdf8" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- False branch: Blocked -->
+  <line x1="690" y1="355" x2="650" y2="355" stroke="#fca5a5" stroke-width="2"/>
+  <line x1="650" y1="355" x2="650" y2="520" stroke="#fca5a5" stroke-width="2"/>
+  <line x1="650" y1="520" x2="665" y2="520" stroke="#fca5a5" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="640" y="430" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#f87171" transform="rotate(-90 640 430)">Không (Count = 0)</text>
+
+  <rect x="665" y="500" width="250" height="55" fill="#1e293b" stroke="#ef4444" stroke-width="1.5" rx="8" filter="url(#shadow)"/>
+  <text x="790" y="522" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#f87171" text-anchor="middle">★ TRẠNG THÁI: BLOCKED</text>
+  <text x="790" y="540" font-family="system-ui, sans-serif" font-size="10.5" fill="#94a3b8" text-anchor="middle">Hết sự kiện để xử lý -> Nhường CPU</text>
+
+  <!-- Handover CPU to Periodic -->
+  <path d="M 665 535 L 320 535 L 320 602 L 290 602" fill="none" stroke="#22c55e" stroke-width="2" stroke-dasharray="4 2" marker-end="url(#arrow)"/>
+</svg>

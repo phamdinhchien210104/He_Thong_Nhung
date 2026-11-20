@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 760" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg18" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <filter id="shadow18" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <marker id="arrow18" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrow18-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#fb923c"/>
+    </marker>
+    <marker id="arrow18-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#c084fc"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="760" fill="url(#bg18)" rx="16"/>
+  <rect x="2" y="2" width="956" height="756" fill="none" stroke="#334155" stroke-width="2" rx="15"/>
+
+  <!-- Title -->
+  <text x="480" y="42" font-family="system-ui, sans-serif" font-size="22" font-weight="bold" fill="#c084fc" text-anchor="middle">LƯU ĐỒ THUẬT TOÁN VÍ DỤ 18: CENTRALIZED DEFERRED INTERRUPT</text>
+  <text x="480" y="68" font-family="system-ui, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">Trì hoãn xử lý ngắt tập trung qua RTOS Daemon Task (Timer Service Task) — Tiết kiệm RAM</text>
+
+  <!-- Column 1: vPeriodicTask -->
+  <rect x="30" y="90" width="280" height="640" fill="#064e3b" fill-opacity="0.3" stroke="#22c55e" stroke-width="2" rx="10" stroke-dasharray="4 2"/>
+  <rect x="40" y="100" width="260" height="32" fill="#15803d" rx="6"/>
+  <text x="170" y="122" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">vPeriodicTask (Ưu tiên 1)</text>
+
+  <rect x="60" y="150" width="220" height="45" fill="#1e293b" stroke="#22c55e" stroke-width="1.5" rx="22" filter="url(#shadow18)"/>
+  <text x="170" y="177" font-family="system-ui, sans-serif" font-size="12" fill="#e2e8f0" text-anchor="middle">Bắt đầu chu kỳ vòng lặp</text>
+
+  <line x1="170" y1="195" x2="170" y2="230" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow18)"/>
+
+  <rect x="50" y="230" width="240" height="55" fill="#1e293b" stroke="#22c55e" stroke-width="1.5" rx="8" filter="url(#shadow18)"/>
+  <text x="170" y="252" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#fde047" text-anchor="middle">vTaskDelay(500ms)</text>
+  <text x="170" y="272" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">Task chuyển sang trạng thái BLOCKED</text>
+
+  <line x1="170" y1="285" x2="170" y2="320" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow18)"/>
+
+  <rect x="50" y="320" width="240" height="45" fill="#1e293b" stroke="#22c55e" stroke-width="1.5" rx="8" filter="url(#shadow18)"/>
+  <text x="170" y="338" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">Hết 500ms: Running trở lại</text>
+  <text x="170" y="354" font-family="system-ui, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">In: About to generate interrupt</text>
+
+  <line x1="170" y1="365" x2="170" y2="395" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow18)"/>
+
+  <rect x="45" y="395" width="250" height="55" fill="#1e293b" stroke="#f97316" stroke-width="2" rx="8" filter="url(#shadow18)"/>
+  <text x="170" y="417" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#fb923c" text-anchor="middle">esp_timer_start_once(timer, 0)</text>
+  <text x="170" y="437" font-family="system-ui, sans-serif" font-size="11" fill="#fca5a5" text-anchor="middle">★ KÍCH HOẠT NGẮT PHẦN CỨNG</text>
+
+  <!-- Trigger line -->
+  <path d="M 295 422 L 340 422 L 340 172 L 375 172" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-dasharray="5 3" marker-end="url(#arrow18-orange)"/>
+
+  <rect x="50" y="580" width="240" height="45" fill="#1e293b" stroke="#22c55e" stroke-width="1.5" rx="8" filter="url(#shadow18)"/>
+  <text x="170" y="598" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">Daemon Task xử lý xong -> Trả CPU</text>
+  <text x="170" y="614" font-family="system-ui, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="middle">In: Periodic task - Interrupt generated</text>
+
+  <!-- Loop back -->
+  <path d="M 170 625 L 170 700 L 40 700 L 40 172 L 60 172" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow18)"/>
+
+  <!-- Column 2: ISR -->
+  <rect x="340" y="90" width="280" height="640" fill="#7c2d12" fill-opacity="0.3" stroke="#f97316" stroke-width="2" rx="10" stroke-dasharray="4 2"/>
+  <rect x="350" y="100" width="260" height="32" fill="#c2410c" rx="6"/>
+  <text x="480" y="122" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">vExampleInterruptHandler (ISR)</text>
+
+  <rect x="375" y="150" width="210" height="45" fill="#1e293b" stroke="#f97316" stroke-width="1.5" rx="22" filter="url(#shadow18)"/>
+  <text x="480" y="177" font-family="system-ui, sans-serif" font-size="12" fill="#e2e8f0" text-anchor="middle">Ngắt kích hoạt (Ngữ cảnh ISR)</text>
+
+  <line x1="480" y1="195" x2="480" y2="230" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow18)"/>
+
+  <rect x="355" y="230" width="250" height="60" fill="#1e293b" stroke="#c084fc" stroke-width="1.5" rx="8" filter="url(#shadow18)"/>
+  <text x="480" y="248" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#c084fc" text-anchor="middle">xTimerPendFunctionCallFromISR()</text>
+  <text x="480" y="266" font-family="system-ui, sans-serif" font-size="10" fill="#e2e8f0" text-anchor="middle">★ Đẩy {vDeferredHandlingFunction,</text>
+  <text x="480" y="280" font-family="system-ui, sans-serif" font-size="10" fill="#4ade80" text-anchor="middle">NULL, ulParameterValue} vào xTimerQueue</text>
+
+  <line x1="480" y1="290" x2="480" y2="325" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow18)"/>
+
+  <rect x="355" y="325" width="250" height="50" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" rx="8" filter="url(#shadow18)"/>
+  <text x="480" y="344" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#38bdf8" text-anchor="middle">★ THÔNG SỐ: ulParameterValue++</text>
+  <text x="480" y="362" font-family="system-ui, sans-serif" font-size="10.5" fill="#4ade80" text-anchor="middle">woken = pdTRUE (Pri 5 &gt; Pri 1)</text>
+
+  <line x1="480" y1="375" x2="480" y2="410" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow18)"/>
+
+  <!-- Decision Diamond -->
+  <polygon points="480,410 580,445 480,480 380,445" fill="#1e293b" stroke="#eab308" stroke-width="1.5" filter="url(#shadow18)"/>
+  <text x="480" y="442" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#fde047" text-anchor="middle">woken ==</text>
+  <text x="480" y="456" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#fde047" text-anchor="middle">pdTRUE?</text>
+
+  <line x1="480" y1="480" x2="480" y2="515" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow18)"/>
+  <text x="495" y="500" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#4ade80">Đúng</text>
+
+  <rect x="355" y="515" width="250" height="55" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" rx="8" filter="url(#shadow18)"/>
+  <text x="480" y="535" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#e2e8f0" text-anchor="middle">portYIELD_FROM_ISR(pdTRUE)</text>
+  <text x="480" y="553" font-family="system-ui, sans-serif" font-size="10.5" fill="#38bdf8" text-anchor="middle">esp_timer_isr_dispatch_need_yield()</text>
+
+  <line x1="480" y1="570" x2="480" y2="610" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow18)"/>
+
+  <rect x="365" y="610" width="230" height="45" fill="#1e293b" stroke="#f97316" stroke-width="1.5" rx="22" filter="url(#shadow18)"/>
+  <text x="480" y="630" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#fb923c" text-anchor="middle">Thoát ISR</text>
+  <text x="480" y="645" font-family="system-ui, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">Context Switch sang Daemon Task (Pri 5)</text>
+
+  <!-- Line to Daemon Task -->
+  <path d="M 595 632 L 635 632 L 635 172 L 685 172" fill="none" stroke="#c084fc" stroke-width="2.5" marker-end="url(#arrow18-purple)"/>
+
+  <!-- Column 3: Daemon Task -->
+  <rect x="650" y="90" width="280" height="640" fill="#581c87" fill-opacity="0.3" stroke="#a855f7" stroke-width="2" rx="10" stroke-dasharray="4 2"/>
+  <rect x="660" y="100" width="260" height="32" fill="#7e22ce" rx="6"/>
+  <text x="790" y="122" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">RTOS Daemon Task (Ưu tiên 5)</text>
+
+  <rect x="685" y="150" width="210" height="45" fill="#1e293b" stroke="#c084fc" stroke-width="1.5" rx="22" filter="url(#shadow18)"/>
+  <text x="790" y="177" font-family="system-ui, sans-serif" font-size="12" fill="#e2e8f0" text-anchor="middle">Thức dậy (Pri 5 &gt; Pri 1)</text>
+
+  <line x1="790" y1="195" x2="790" y2="235" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow18)"/>
+
+  <rect x="665" y="235" width="250" height="50" fill="#1e293b" stroke="#c084fc" stroke-width="1.5" rx="8" filter="url(#shadow18)"/>
+  <text x="790" y="255" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#c084fc" text-anchor="middle">Đọc lệnh từ xTimerQueue</text>
+  <text x="790" y="272" font-family="system-ui, sans-serif" font-size="10.5" fill="#94a3b8" text-anchor="middle">Giải mã: Execute Pended Function</text>
+
+  <line x1="790" y1="285" x2="790" y2="325" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow18)"/>
+
+  <rect x="665" y="325" width="250" height="65" fill="#1e293b" stroke="#22c55e" stroke-width="1.5" rx="8" filter="url(#shadow18)"/>
+  <text x="790" y="345" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#4ade80" text-anchor="middle">Gọi vDeferredHandlingFunction()</text>
+  <text x="790" y="362" font-family="system-ui, sans-serif" font-size="10" fill="#e2e8f0" text-anchor="middle">Tham số: (NULL, ulParameterValue)</text>
+  <text x="790" y="378" font-family="system-ui, sans-serif" font-size="10" fill="#38bdf8" text-anchor="middle">In: Processing event: [count]</text>
+
+  <line x1="790" y1="390" x2="790" y2="430" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow18)"/>
+
+  <!-- Decision Queue Empty -->
+  <polygon points="790,430 890,465 790,500 690,465" fill="#1e293b" stroke="#eab308" stroke-width="1.5" filter="url(#shadow18)"/>
+  <text x="790" y="462" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#fde047" text-anchor="middle">Còn lệnh trong</text>
+  <text x="790" y="476" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#fde047" text-anchor="middle">xTimerQueue?</text>
+
+  <line x1="790" y1="500" x2="790" y2="540" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow18)"/>
+  <text x="805" y="525" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#f87171">Không (Hết lệnh)</text>
+
+  <rect x="665" y="540" width="250" height="55" fill="#1e293b" stroke="#ef4444" stroke-width="1.5" rx="8" filter="url(#shadow18)"/>
+  <text x="790" y="562" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#f87171" text-anchor="middle">★ TRẠNG THÁI: BLOCKED</text>
+  <text x="790" y="580" font-family="system-ui, sans-serif" font-size="10.5" fill="#94a3b8" text-anchor="middle">Daemon Task tự block chờ lệnh mới</text>
+
+  <!-- Handover CPU to Periodic -->
+  <path d="M 665 572 L 320 572 L 320 602 L 290 602" fill="none" stroke="#22c55e" stroke-width="2" stroke-dasharray="4 2" marker-end="url(#arrow18)"/>
+</svg>

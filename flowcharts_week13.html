@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lưu Đồ Thuật Toán - Hệ Thống Nhúng Tuần 13 (Ví Dụ 17, 18, 19)</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-orange: #fb923c;
+      --accent-purple: #c084fc;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 30px 20px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 {
+      font-size: 2.2rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    p.subtitle {
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+    }
+    .example-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+    .example-title {
+      font-size: 1.5rem;
+      color: var(--primary);
+      border-left: 4px solid var(--primary);
+      padding-left: 12px;
+      margin-bottom: 15px;
+    }
+    .note-box {
+      background: #0f172a;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+    }
+    .note-box strong { color: var(--accent-orange); }
+    .mermaid {
+      background: #0b1120;
+      border-radius: 8px;
+      padding: 20px;
+      overflow-x: auto;
+    }
+    .export-bar {
+      margin-top: 15px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    button.btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    button.btn:hover {
+      background: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Lưu Đồ Thuật Toán Hệ Thống Nhúng (Tuần 13)</h1>
+      <p class="subtitle">FreeRTOS trên ESP32-C3: Counting Semaphore, Centralized Deferred Interrupt và Queue trong ISR</p>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background:#22c55e;"></div>Task thông thường (Green)</div>
+        <div class="legend-item"><div class="legend-color" style="background:#f97316;"></div>Ngữ cảnh ngắt ISR (Orange)</div>
+        <div class="legend-item"><div class="legend-color" style="background:#0284c7;"></div>Đối tượng Semaphore / Queue (Blue)</div>
+        <div class="legend-item"><div class="legend-color" style="background:#a855f7;"></div>RTOS Daemon Task (Purple)</div>
+        <div class="legend-item"><div class="legend-color" style="background:#eab308;"></div>Khối điều kiện rẽ nhánh (Yellow)</div>
+      </div>
+    </header>
+
+    <!-- VÍ DỤ 17 -->
+    <div class="example-card" id="card-ex17">
+      <h2 class="example-title">Ví Dụ 17: Đồng Bộ Hóa Task Với Ngắt Bằng Counting Semaphore</h2>
+      <div class="note-box">
+        <strong>📌 Khối điều chỉnh thông số chính:</strong>
+        <br>• <code>xSemaphoreCreateCounting(10, 0)</code>: Khởi tạo <code>Count = 0</code>, <code>MaxCount = 10</code>.
+        <br>• <code>vExampleInterruptHandler</code>: Gọi <code>xSemaphoreGiveFromISR()</code> 3 lần liên tiếp $\rightarrow$ điều chỉnh <code>Count = 0 -> 1 -> 2 -> 3</code>, đặt <code>woken = pdTRUE</code>.
+        <br>• <code>vHandlerTask</code>: Lấy semaphore 3 lần $\rightarrow$ điều chỉnh <code>Count = 3 -> 2 -> 1 -> 0</code>, in 3 lần log trước khi Blocked.
+      </div>
+      <div class="mermaid">
+flowchart TD
+    %% Khối Periodic Task
+    subgraph G_PT ["Luồng 1: vPeriodicTask (Độ ưu tiên: 1)"]
+        PT_Start(["Bắt đầu chu kỳ"]) --> PT_Delay["vTaskDelay(500ms)<br/>(Trạng thái: Blocked)"]
+        PT_Delay --> PT_Awake["Hết 500ms -> Trạng thái: Running"]
+        PT_Awake --> PT_Log1["In Log: About to generate an interrupt"]
+        PT_Log1 --> PT_Trigger["esp_timer_start_once(xInterruptTimer, 0)<br/>KÍCH HOẠT NGẮT PHẦN CỨNG"]
+        PT_Trigger -.->|Nhường CPU cho ISR| ISR_Start
+        PT_Wait["Chờ ISR và HandlerTask chạy xong"] --> PT_Log2["In Log: Periodic task - Interrupt generated"]
+        PT_Log2 --> PT_Start
+    end
+
+    %% Khối ISR
+    subgraph G_ISR ["Luồng 2: vExampleInterruptHandler (Ngữ cảnh ISR)"]
+        ISR_Start(["Ngắt phần cứng kích hoạt"]) --> ISR_Init["Khởi tạo: xHigherPriorityTaskWoken = pdFALSE"]
+        ISR_Init --> ISR_Give1["xSemaphoreGiveFromISR()<br/>★ THÔNG SỐ: Count = 0 -> 1<br/>Đánh thức HandlerTask -> Woken = pdTRUE"]
+        ISR_Give1 --> ISR_Give2["xSemaphoreGiveFromISR()<br/>★ THÔNG SỐ: Count = 1 -> 2"]
+        ISR_Give2 --> ISR_Give3["xSemaphoreGiveFromISR()<br/>★ THÔNG SỐ: Count = 2 -> 3 (Lưu đủ 3 sự kiện)"]
+        ISR_Give3 --> ISR_Check{"xHigherPriorityTaskWoken == pdTRUE?"}
+        ISR_Check -- Đúng --> ISR_Yield["Gọi esp_timer_isr_dispatch_need_yield()<br/>và portYIELD_FROM_ISR(pdTRUE)"]
+        ISR_Check -- Sai --> ISR_Ret["Thoát ISR thông thường"]
+        ISR_Yield --> ISR_End(["Thoát ISR & Context Switch sang HandlerTask"])
+    end
+
+    %% Khối Handler Task
+    subgraph G_HT ["Luồng 3: vHandlerTask (Độ ưu tiên: 3)"]
+        HT_Start(["Được đánh thức (Pri 3 > Pri 1)"]) --> HT_Take["Gọi xSemaphoreTake(xCountingSemaphore, portMAX_DELAY)"]
+        HT_Take --> HT_Cond{"Count > 0?"}
+        HT_Cond -- Có (Count > 0) --> HT_Proc["★ THÔNG SỐ: Count = Count - 1<br/>In Log: Handler task - Processing event"]
+        HT_Proc --> HT_Take
+        HT_Cond -- Không (Count == 0) --> HT_Block["★ THÔNG SỐ: Task chuyển trạng thái: BLOCKED<br/>(Hết sự kiện để xử lý)"]
+        HT_Block -.->|Trả lại CPU cho Pri 1| PT_Wait
+    end
+
+    style G_PT fill:#14532d,stroke:#22c55e,stroke-width:2px;
+    style G_ISR fill:#7c2d12,stroke:#f97316,stroke-width:2px;
+    style G_HT fill:#1e3a8a,stroke:#3b82f6,stroke-width:2px;
+      </div>
+    </div>
+
+    <!-- VÍ DỤ 18 -->
+    <div class="example-card" id="card-ex18">
+      <h2 class="example-title">Ví Dụ 18: Centralized Deferred Interrupt Processing (Daemon Task)</h2>
+      <div class="note-box">
+        <strong>📌 Khối điều chỉnh thông số chính:</strong>
+        <br>• Không tạo Semaphore và Task Handler riêng.
+        <br>• <code>vExampleInterruptHandler</code>: Gọi <code>xTimerPendFunctionCallFromISR()</code> đẩy gói lệnh vào <code>xTimerQueue</code>, tăng <code>ulParameterValue = ulParameterValue + 1</code>.
+        <br>• <code>RTOS Daemon Task (Timer Service Task)</code> (Ưu tiên 5): Đọc gói lệnh từ Queue, gọi trực tiếp hàm <code>vDeferredHandlingFunction(NULL, ulParameterValue)</code>.
+      </div>
+      <div class="mermaid">
+flowchart TD
+    %% Khối Periodic Task
+    subgraph G18_PT ["Luồng 1: vPeriodicTask (Độ ưu tiên: 1)"]
+        P18_Start(["Bắt đầu chu kỳ"]) --> P18_Delay["vTaskDelay(500ms)<br/>(Trạng thái: Blocked)"]
+        P18_Delay --> P18_Awake["Hết 500ms -> Trạng thái: Running"]
+        P18_Awake --> P18_Log1["In Log: About to generate an interrupt"]
+        P18_Log1 --> P18_Trigger["esp_timer_start_once(xInterruptTimer, 0)<br/>KÍCH HOẠT NGẮT"]
+        P18_Trigger -.->|Nhường CPU cho ISR| I18_Start
+        P18_Wait["Chờ Daemon Task hoàn thành"] --> P18_Log2["In Log: Periodic task - Interrupt generated"]
+        P18_Log2 --> P18_Start
+    end
+
+    %% Khối ISR
+    subgraph G18_ISR ["Luồng 2: vExampleInterruptHandler (Ngữ cảnh ISR)"]
+        I18_Start(["Ngắt timer kích hoạt"]) --> I18_Init["Khởi tạo: xHigherPriorityTaskWoken = pdFALSE"]
+        I18_Init --> I18_Pend["xTimerPendFunctionCallFromISR(<br/>vDeferredHandlingFunction, NULL, ulParameterValue, &woken)<br/>★ THÔNG SỐ: Đóng gói {Con trỏ hàm, ulParameterValue} vào xTimerQueue<br/>Đánh thức Daemon Task -> woken = pdTRUE"]
+        I18_Pend --> I18_Inc["★ THÔNG SỐ: ulParameterValue = ulParameterValue + 1"]
+        I18_Inc --> I18_Check{"woken == pdTRUE?"}
+        I18_Check -- Đúng --> I18_Yield["Gọi esp_timer_isr_dispatch_need_yield()<br/>và portYIELD_FROM_ISR(pdTRUE)"]
+        I18_Check -- Sai --> I18_Ret["Thoát ISR"]
+        I18_Yield --> I18_End(["Thoát ISR & Context Switch sang Daemon Task"])
+    end
+
+    %% Khối Daemon Task
+    subgraph G18_DT ["Luồng 3: RTOS Daemon Task / Timer Service Task (Độ ưu tiên: 5)"]
+        D18_Start(["Daemon Task thức dậy (Pri 5 > Pri 1)"]) --> D18_Read["Đọc lệnh từ xTimerQueue"]
+        D18_Read --> D18_Call["Thực thi hàm callback pended:<br/>vDeferredHandlingFunction(NULL, ulParameterValue)"]
+        D18_Call --> D18_Log["In Log: Handler function - Processing event: ulParameterValue"]
+        D18_Log --> D18_CheckQ{"Còn lệnh trong xTimerQueue?"}
+        D18_CheckQ -- Có --> D18_Read
+        D18_CheckQ -- Không --> D18_Block["★ THÔNG SỐ: Daemon Task chuyển trạng thái: BLOCKED"]
+        D18_Block -.->|Trả CPU về cho Pri 1| P18_Wait
+    end
+
+    style G18_PT fill:#14532d,stroke:#22c55e,stroke-width:2px;
+    style G18_ISR fill:#7c2d12,stroke:#f97316,stroke-width:2px;
+    style G18_DT fill:#581c87,stroke:#c084fc,stroke-width:2px;
+      </div>
+    </div>
+
+    <!-- VÍ DỤ 19 -->
+    <div class="example-card" id="card-ex19">
+      <h2 class="example-title">Ví Dụ 19: Sử Dụng Hàng Đợi (Queue) Trong Ngắt ISR</h2>
+      <div class="note-box">
+        <strong>📌 Khối điều chỉnh thông số chính:</strong>
+        <br>• <code>vIntegerGenerator</code>: Gửi 5 số liên tiếp vào <code>xIntegerQueue</code> $\rightarrow$ <code>ulValueToSend</code> tăng 5 lần (0..4, 5..9,...).
+        <br>• <code>vExampleInterruptHandler</code>: Rút từng số ra, thực hiện phép toán bit <code>ulReceivedNumber &= 0x03</code> (lấy 0..3), gửi con trỏ chuỗi <code>&pcStrings[index]</code> vào <code>xStringQueue</code>, đánh thức <code>vStringPrinter</code> (woken = pdTRUE).
+        <br>• <code>vStringPrinter</code> (Ưu tiên 2): Rút lần lượt 5 con trỏ chuỗi từ <code>xStringQueue</code> và in ra terminal.
+      </div>
+      <div class="mermaid">
+flowchart TD
+    %% Khối Generator Task
+    subgraph G19_GT ["Luồng 1: vIntegerGenerator (Độ ưu tiên: 1)"]
+        G19_Start(["Bắt đầu chu kỳ 200ms"]) --> G19_Delay["vTaskDelayUntil(&xLastExecutionTime, 200ms)"]
+        G19_Delay --> G19_LoopInit["Khởi tạo vòng lặp: i = 0"]
+        G19_LoopInit --> G19_Cond{"i < 5?"}
+        G19_Cond -- Đúng --> G19_Send["xQueueSendToBack(xIntegerQueue, &ulValueToSend, 0)<br/>★ THÔNG SỐ: ulValueToSend++, i++"]
+        G19_Send --> G19_Cond
+        G19_Cond -- Sai (Đủ 5 số) --> G19_Log1["In Log: Generator task - About to generate an interrupt"]
+        G19_Log1 --> G19_Trigger["esp_timer_start_once(xInterruptTimer, 0)<br/>KÍCH HOẠT NGẮT"]
+        G19_Trigger -.->|Nhường CPU cho ISR| I19_Start
+        G19_Wait["Chờ StringPrinter in xong"] --> G19_Log2["In Log: Generator task - Interrupt generated"]
+        G19_Log2 --> G19_Start
+    end
+
+    %% Khối ISR
+    subgraph G19_ISR ["Luồng 2: vExampleInterruptHandler (Ngữ cảnh ISR)"]
+        I19_Start(["Ngắt timer kích hoạt"]) --> I19_Init["Khởi tạo: xHigherPriorityTaskWoken = pdFALSE"]
+        I19_Init --> I19_Recv["xQueueReceiveFromISR(xIntegerQueue, &ulReceivedNumber, &woken)"]
+        I19_Recv --> I19_CheckRecv{"Đọc thành công?<br/>( != errQUEUE_EMPTY )"}
+        I19_CheckRecv -- Đúng --> I19_Bitwise["★ THÔNG SỐ: ulReceivedNumber &= 0x03<br/>(Lấy 2 bit cuối = 0, 1, 2, 3 làm index)"]
+        I19_Bitwise --> I19_SendStr["xQueueSendToBackFromISR(xStringQueue, &pcStrings[index], &woken)<br/>★ THÔNG SỐ: Đẩy CON TRỎ chuỗi vào xStringQueue<br/>Đánh thức StringPrinter -> woken = pdTRUE"]
+        I19_SendStr --> I19_Recv
+        I19_CheckRecv -- Sai (Queue rỗng) --> I19_YieldCheck{"woken == pdTRUE?"}
+        I19_YieldCheck -- Đúng --> I19_Yield["Gọi esp_timer_isr_dispatch_need_yield()<br/>và portYIELD_FROM_ISR(pdTRUE)"]
+        I19_YieldCheck -- Sai --> I19_Ret["Thoát ISR"]
+        I19_Yield --> I19_End(["Thoát ISR & Context Switch sang vStringPrinter"])
+    end
+
+    %% Khối String Printer Task
+    subgraph G19_SP ["Luồng 3: vStringPrinter (Độ ưu tiên: 2)"]
+        S19_Start(["Được đánh thức (Pri 2 > Pri 1)"]) --> S19_Recv["xQueueReceive(xStringQueue, &pcString, portMAX_DELAY)"]
+        S19_Recv --> S19_Cond{"Nhận được chuỗi?"}
+        S19_Cond -- Có --> S19_Print["In Log: Printer received: [pcString]"]
+        S19_Print --> S19_Recv
+        S19_Cond -- Hàng đợi rỗng --> S19_Block["★ THÔNG SỐ: vStringPrinter chuyển trạng thái: BLOCKED"]
+        S19_Block -.->|Trả CPU về cho Pri 1| G19_Wait
+    end
+
+    style G19_GT fill:#14532d,stroke:#22c55e,stroke-width:2px;
+    style G19_ISR fill:#7c2d12,stroke:#f97316,stroke-width:2px;
+    style G19_SP fill:#1e3a8a,stroke:#3b82f6,stroke-width:2px;
+      </div>
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: 'basis'
+      }
+    });
+  </script>
+</body>
+</html>

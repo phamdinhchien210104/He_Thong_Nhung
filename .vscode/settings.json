@@ -1,6 +1,5 @@
 {
   "idf.currentSetup": "C:\\esp\\v6.1-beta1\\esp-idf",
-  "cmake.sourceDirectory": "C:/he_thong_nhung/main",
   "idf.openOcdConfigs": [
     "board/esp32c3-builtin.cfg"
   ],
